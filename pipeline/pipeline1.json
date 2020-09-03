@@ -48,7 +48,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup Each Table').output",
+						"value": "@activity('Lookup Each Table').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
