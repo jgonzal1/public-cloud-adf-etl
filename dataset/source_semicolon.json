@@ -1,0 +1,35 @@
+{
+	"name": "source_semicolon",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "stwepreporting",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ClientName": {
+				"type": "string",
+				"defaultValue": "solvia"
+			}
+		},
+		"folder": {
+			"name": "PublicCloudPre"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": {
+					"value": "@dataset().ClientName",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ";",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

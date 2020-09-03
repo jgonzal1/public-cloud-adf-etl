@@ -1,0 +1,52 @@
+{
+	"name": "cost_control_cost_acumulated_d_i",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "stwepreporting",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"current_date": {
+				"type": "String",
+				"defaultValue": "@utcNow('yyyy-MM-dd')"
+			},
+			"client_abr": {
+				"type": "String",
+				"defaultValue": "SLV"
+			},
+			"client_name": {
+				"type": "string",
+				"defaultValue": "solvia"
+			}
+		},
+		"folder": {
+			"name": "PublicCloudPre"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@concat(\n    dataset().client_abr,\n    '-CostAcumulated-',\n    formatDateTime(\n        addDays(\n            utcnow('yyyy-MM-dd'),\n            -10\n        ),\n    'yyyy-MM-dd'\n    ),\n    '.csv'\n)",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().client_name",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "þ",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "col1",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

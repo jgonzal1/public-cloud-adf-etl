@@ -1,0 +1,26 @@
+{
+	"name": "weekly_trigger_pre",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2020-07-16T05:00:00Z",
+				"endTime": "2021-07-18T05:00:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						6
+					]
+				}
+			}
+		}
+	}
+}

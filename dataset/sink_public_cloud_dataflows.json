@@ -1,0 +1,35 @@
+{
+	"name": "sink_public_cloud_dataflows",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ClientName": {
+				"type": "string",
+				"defaultValue": "solvia"
+			}
+		},
+		"folder": {
+			"name": "PublicCloudPre"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().ClientName",
+					"type": "Expression"
+				},
+				"container": "publicloud"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

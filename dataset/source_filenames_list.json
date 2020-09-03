@@ -1,0 +1,35 @@
+{
+	"name": "source_filenames_list",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"file_name_list": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "PublicCloudPre"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().file_name_list",
+					"type": "Expression"
+				},
+				"container": "publicloud"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

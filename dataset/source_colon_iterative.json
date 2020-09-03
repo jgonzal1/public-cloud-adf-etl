@@ -1,0 +1,38 @@
+{
+	"name": "source_colon_iterative",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "stwepreporting",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"client_name": {
+				"type": "string",
+				"defaultValue": "solvia"
+			},
+			"client": {
+				"type": "string",
+				"defaultValue": "SLV"
+			}
+		},
+		"folder": {
+			"name": "PublicCloudPre"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": {
+					"value": "@dataset().client_name",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ":",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

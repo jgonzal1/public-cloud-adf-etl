@@ -1,0 +1,66 @@
+{
+	"name": "cost_control_disk_space_data_flow",
+	"properties": {
+		"folder": {
+			"name": "PublicCloudDailyLoad"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "source_thorn_iterative",
+						"type": "DatasetReference"
+					},
+					"name": "CostControlDiskSpaceI1"
+				},
+				{
+					"dataset": {
+						"referenceName": "source_thorn_iterative",
+						"type": "DatasetReference"
+					},
+					"name": "CostControlDiskSpaceI2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "cost_control_disk_space_o",
+						"type": "DatasetReference"
+					},
+					"name": "CostControlDiskSpaceO"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CommaDelimLogsI1"
+				},
+				{
+					"name": "CommaDelimLogsI2"
+				},
+				{
+					"name": "ConditionalSplit2"
+				},
+				{
+					"name": "SelectSecondPart"
+				},
+				{
+					"name": "SelectFirstPart"
+				},
+				{
+					"name": "Union"
+				},
+				{
+					"name": "OnlyPayloadFilter"
+				},
+				{
+					"name": "CompDsDelim"
+				},
+				{
+					"name": "Select"
+				}
+			],
+			"script": "parameters{\n\tclient_abr as string,\n\tclient_name as string\n}\nsource(output(\n\t\tcol1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'Filename',\n\tmodifiedAfter: (addDays(currentTimestamp(),-1)),\n\twildcardPaths:[(concat( $client_abr ,\"-DiskSpace-*.csv\"))]) ~> CostControlDiskSpaceI1\nsource(output(\n\t\tcol1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'Filename',\n\tmodifiedAfter: (addDays(currentTimestamp(),-1)),\n\twildcardPaths:[(concat( $client_abr ,\"-DiskSpace-*.csv\"))]) ~> CostControlDiskSpaceI2\nCostControlDiskSpaceI1 derive(col2 = iif(\r\n    locate(\",\",col1)>0,\r\n    left(col1,locate(\",\",col1)),\r\n    col1\r\n),\n\t\t{Date modified} = substring(Filename,16,10)) ~> CommaDelimLogsI1\nCostControlDiskSpaceI2 derive(col2 = iif(\r\n    locate(\",\",col1)>0,\r\n    substring(col1,locate(\",\",col1)+2),\r\n    \"\"\r\n),\n\t\t{Date modified} = substring(Filename,16,10)) ~> CommaDelimLogsI2\nCommaDelimLogsI2 split(col2!='',\n\tdisjoint: false) ~> ConditionalSplit2@(DoubleLog, UniqueLog)\nConditionalSplit2@DoubleLog select(mapColumn(\n\t\tDiskSpaceColumns = col2,\n\t\t{Date modified}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectSecondPart\nCommaDelimLogsI1 select(mapColumn(\n\t\tDiskSpaceColumns = col2,\n\t\t{Date modified}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectFirstPart\nSelectFirstPart, SelectSecondPart union(byName: true)~> Union\nUnion filter(iif(\r\n    left(DiskSpaceColumns,1)=='@',\r\n    true(),\r\n    iif(\r\n        substring(DiskSpaceColumns,2,1)=='@',\r\n        true(),\r\n        false()\r\n    )\r\n)) ~> OnlyPayloadFilter\nOnlyPayloadFilter derive(Computer = left(DiskSpaceColumns,locate(\";\",DiskSpaceColumns)-1),\n\t\tDiskSpace = regexExtract(\r\n    substring(\r\n        DiskSpaceColumns,\r\n        locate(\";\",DiskSpaceColumns)+2\r\n    ),\r\n    `(\\d+\\.?\\d{0,})`,\r\n    1\r\n)) ~> CompDsDelim\nCompDsDelim select(mapColumn(\n\t\t{Date modified},\n\t\tComputer,\n\t\tDiskSpace\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select\nSelect sink(input(\n\t\t{Date modified} as string,\n\t\tComputer as string,\n\t\tDiskSpace as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['Staging_DiskSpace.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CostControlDiskSpaceO"
+		}
+	}
+}

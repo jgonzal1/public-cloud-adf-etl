@@ -1,0 +1,41 @@
+{
+	"name": "capacidad_storage_account_policy_data_flow",
+	"properties": {
+		"folder": {
+			"name": "PublicCloudDailyLoad"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "source_thorn_iterative",
+						"type": "DatasetReference"
+					},
+					"name": "CapacidadStorageAccountPolicyI"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "capacidad_storage_account_policy_o",
+						"type": "DatasetReference"
+					},
+					"name": "CapacidadStorageAccountPolicyO"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SpaceDelimFields"
+				},
+				{
+					"name": "SelectPayload"
+				},
+				{
+					"name": "OnlyPayloadFilter"
+				}
+			],
+			"script": "parameters{\n\tclient_abr as string,\n\tclient_name as string\n}\nsource(output(\n\t\tcol1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'Filename',\n\tmodifiedAfter: (addDays(currentTimestamp(),-1)),\n\twildcardPaths:[(concat( $client_abr ,\"-StorageAccountPolicy-*.csv\"))]) ~> CapacidadStorageAccountPolicyI\nCapacidadStorageAccountPolicyI derive(StorageAccountName = left(\r\n    col1,\r\n    locate(\" \",col1)\r\n),\n\t\tRulesAndActive = regexExtract(\r\n    col1,\r\n    \" (\\\\S+ ?\\\\S+)  \",\r\n    1\r\n),\n\t\tRulesStatus = right(col1,2),\n\t\t{Date modified} = substring(Filename,27,10)) ~> SpaceDelimFields\nSpaceDelimFields select(mapColumn(\n\t\tStorageAccountName,\n\t\tRulesAndActive,\n\t\tRulesStatus,\n\t\t{Date modified}\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectPayload\nSelectPayload filter(iif(\r\n    length(StorageAccountName)<1,\r\n    false(),\r\n    iif(\r\n        left(StorageAccountName,1)=='-',\r\n        false(),\r\n        true()\r\n    )\r\n)) ~> OnlyPayloadFilter\nOnlyPayloadFilter sink(input(\n\t\tStorageAccountName as string,\n\t\tRulesAndActive as string,\n\t\t{Date modified} as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['Staging_StorageAccountPolicy.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CapacidadStorageAccountPolicyO"
+		}
+	}
+}
