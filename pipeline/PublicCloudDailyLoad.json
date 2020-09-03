@@ -2642,7 +2642,7 @@
 				}
 			},
 			{
-				"name": "Lookup1",
+				"name": "Lookup",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -2711,11 +2711,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEach",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "Lookup",
 						"dependencyConditions": [
 							"Succeeded"
 						]
