@@ -29,7 +29,7 @@
 						"referenceName": "source_filenames_list",
 						"type": "DatasetReference",
 						"parameters": {
-							"file_name_list": "Clients_Filenames.csv"
+							"file_name_list": "Clients_and_Filenames.csv"
 						}
 					}
 				}
