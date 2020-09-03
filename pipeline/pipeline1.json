@@ -31,7 +31,8 @@
 						"parameters": {
 							"file_name_list": "Clients_and_Filenames.csv"
 						}
-					}
+					},
+					"firstRowOnly": false
 				}
 			},
 			{
