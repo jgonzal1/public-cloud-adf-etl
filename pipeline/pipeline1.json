@@ -1,0 +1,127 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup Each Table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "Clients_Filenames.csv"
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Each Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Each Table').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "PublicCloudMergeDayToHistDf",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "PublicCloudMergeDayToHistDf",
+									"type": "DataFlowReference",
+									"parameters": {
+										"client_name": {
+											"value": "'@{item().client_name}'",
+											"type": "Expression"
+										},
+										"table_name": {
+											"value": "'@{item().table_name}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"IncrementingFile": {
+											"ClientName": {
+												"value": "@item().client_name",
+												"type": "Expression"
+											},
+											"OutputName": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										},
+										"DailyExtraction": {
+											"ClientName": {
+												"value": "@item().client_name",
+												"type": "Expression"
+											},
+											"OutputName": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										},
+										"MergedHistoricalData": {
+											"ClientName": {
+												"value": "@item().client_name",
+												"type": "Expression"
+											},
+											"OutputName": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}
