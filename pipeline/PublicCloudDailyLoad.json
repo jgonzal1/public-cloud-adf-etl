@@ -1,0 +1,2811 @@
+{
+	"name": "PublicCloudDailyLoad",
+	"properties": {
+		"activities": [
+			{
+				"name": "List FileNames Comma NoH",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "FileNames_Comma_NoH.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each Filename Comma NoH",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "List FileNames Comma NoH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List FileNames Comma NoH').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy FileName Comma NoH",
+							"description": "Hace un merge de todos los días y limpia los datos.",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": false,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat( item().client_abr ,'-', item().TableName, '-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": {
+											"value": "@concat('Staging_',item().TableName, '.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "List FileNames Comma SkipLine",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "FileNames_Comma_SkipLine.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each Filename Comma SkipLine",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "List FileNames Comma SkipLine",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List FileNames Comma SkipLine').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy FileName Comma SkipLine",
+							"description": "Hace un merge de todos los días y limpia los datos.",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": false,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-5))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat( item().ClientAbr ,'-', item().TableName, '-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma_header_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().ClientName",
+											"type": "Expression"
+										},
+										"source_file_name": "''"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().ClientName",
+											"type": "Expression"
+										},
+										"OutputName": {
+											"value": "@concat('Staging_',item().TableName, '.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "List FileNames Thorn NoH",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "FileNames_Thorn_NoH.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each Filename Thorn NoH",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "List FileNames Thorn NoH",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List FileNames Thorn NoH').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy FileName Thorn NoH",
+							"description": "Hace un merge de todos los días y limpia los datos.",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": false,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat( item().client_abr ,'-', item().TableName, '-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 0
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": {
+											"value": "@concat('Staging_',item().TableName, '.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "List Clients",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "Clients.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each Client Then Copy",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "List Clients",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List Clients').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy Seguridad SecurityRecomendations",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@adddays(utcnow('yyyy-MM-dd'),-1)",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false,
+										"prefix": {
+											"value": "@{concat(item().client_abr,'-SecurityRecomendations')}",
+											"type": "Expression"
+										}
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"type": "String",
+												"ordinal": 1
+											},
+											"sink": {
+												"name": "ImpactedValue",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"type": "String",
+												"physicalType": "String",
+												"ordinal": 2
+											},
+											"sink": {
+												"name": "Impact",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"type": "String",
+												"physicalType": "String",
+												"ordinal": 3
+											},
+											"sink": {
+												"name": "ImpactField"
+											}
+										},
+										{
+											"source": {
+												"type": "String",
+												"physicalType": "String",
+												"ordinal": 4
+											},
+											"sink": {
+												"name": "Risk"
+											}
+										},
+										{
+											"source": {
+												"type": "String",
+												"physicalType": "String",
+												"ordinal": 5
+											},
+											"sink": {
+												"name": "ShortDescription"
+											}
+										},
+										{
+											"source": {
+												"name": "FilePath",
+												"type": "String"
+											},
+											"sink": {
+												"name": "FilePath",
+												"type": "String",
+												"physicalType": "String"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_SecurityRecomendations.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy HADR ASRServers",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@adddays(utcnow('yyyy-MM-dd'),-1)",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false,
+										"prefix": {
+											"value": "@{concat(item().client_abr,'-ASRServers')}",
+											"type": "Expression"
+										}
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"type": "String",
+												"physicalType": "String",
+												"ordinal": 1
+											},
+											"sink": {
+												"name": "Prop_0",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "FilePath",
+												"type": "String"
+											},
+											"sink": {
+												"name": "FilePath",
+												"type": "String",
+												"physicalType": "String"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "hadr_asr_servers_d_i",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_ASRServers.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Arquitectura WafExclusions",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr, '-WafExclusions-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_WafExclusions.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Arquitectura FirewallsRules",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "Source",
+									"value": "@{'solvia'}//"
+								},
+								{
+									"name": "Destination",
+									"value": "publicloud/@{'solvia'}/@{'FirewallsRules.csv'}"
+								}
+							],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-FirewallsRules-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_FirewallsRules.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Arquitectura VnetworkInfo",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-VnetworkInfo-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_colon_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_VnetworkInfo.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Arquitectura VMInternalIP",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-VMInternalIP-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_VMInternalIP.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Capacidad ExpressRoute",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-ExpressRoute-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 0
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "capacidad_express_route_10d_i",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_ExpressRoute.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Capacidad TrafficVPN",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-TrafficVPN-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 0
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_TrafficVPN.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy CostControl DBSQL",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-DBSQL-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 2
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_DBSQL.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy CostControl ServersWithAutoStop",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-ServersWithAutoStop-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_ServersWithAutoStop.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Governance ManagedBy",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-ManagedBy-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_ManagedBy.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Governance OperationalExcellence",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-OperationalExcellence-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_thorn_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_OperationalExcellence.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy HADR BackupFailed",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-BackupFailed-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "FilePath",
+												"type": "String"
+											},
+											"sink": {
+												"name": "FilePath",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BackupItemUniqueId_s",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "BackupItemUniqueId"
+											}
+										},
+										{
+											"source": {
+												"name": "_ResourceId",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "ResourceId"
+											}
+										},
+										{
+											"source": {
+												"name": "AggregatedValue",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "AggregatedValue"
+											}
+										},
+										{
+											"source": {
+												"name": "TimeGenerated",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Timestamp"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma_header_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"source_file_name": "BackupFailed"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_BackupFailed.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy HADR BackupsSQLServer",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-BackupsSQLServer-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "hadr_backups_sql_server_d_i",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client_abr": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_BackupsSQLServer.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy HADR BackupsVM",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-BackupsVM-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 2
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "hadr_backups_vm_10d_i",
+									"type": "DatasetReference",
+									"parameters": {
+										"current_date": "@utcNow('yyyy-MM-dd')",
+										"client_abr": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_BackupsVM.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy HADR HighAvailabilityRecomendation",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-HighAvailabilityRecomendations-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_colon_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"client": {
+											"value": "@item().client_abr",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_HighAvailabilityRecomendations.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Seguridad UpdateNeeded",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-UpdateNeeded-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_UpdateNeeded.csv"
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy Seguridad VMPublicIP",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat(item().client_abr,'-VMPublicIP-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().client_name",
+											"type": "Expression"
+										},
+										"OutputName": "Staging_VMPublicIP.csv"
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "For Each Client Then Run Dataflow",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "List Clients",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List Clients').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "ETL CostControl DiskSpace",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "cost_control_disk_space_data_flow",
+									"type": "DataFlowReference",
+									"parameters": {
+										"client_abr": {
+											"value": "'@{item().client_abr}'",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "'@{item().client_name}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"CostControlDiskSpaceI1": {
+											"current_date": "@utcNow('yyyy-MM-dd')",
+											"client": "SLV",
+											"client_name": "solvia"
+										},
+										"CostControlDiskSpaceI2": {
+											"current_date": "@utcNow('yyyy-MM-dd')",
+											"client": "SLV",
+											"client_name": "solvia"
+										},
+										"CostControlDiskSpaceO": {
+											"ClientName": "solvia"
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						},
+						{
+							"name": "ETL Capacidad StorageAccountPolicy",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "ClientName",
+									"value": "solvia"
+								}
+							],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "capacidad_storage_account_policy_data_flow",
+									"type": "DataFlowReference",
+									"parameters": {
+										"client_abr": {
+											"value": "'@{item().client_abr}'",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "'@{item().client_name}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"CapacidadStorageAccountPolicyI": {
+											"current_date": "@utcNow('yyyy-MM-dd')",
+											"client": "SLV",
+											"client_name": "solvia"
+										},
+										"CapacidadStorageAccountPolicyO": {
+											"ClientName": "solvia"
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						},
+						{
+							"name": "ETL Governance TotalTags",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "ClientName",
+									"value": "solvia"
+								}
+							],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "governance_total_tags_data_flow",
+									"type": "DataFlowReference",
+									"parameters": {
+										"client_name": {
+											"value": "'@{item().client_name}'",
+											"type": "Expression"
+										},
+										"client_abr": {
+											"value": "'@{item().client_abr}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"GovTotTagsI": {
+											"current_date": "@utcNow('yyyy-MM-dd')",
+											"client": "SLV",
+											"client_name": "solvia"
+										},
+										"GovTotTagsO": {
+											"ClientName": "solvia"
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						},
+						{
+							"name": "ETL CostControl CostAcumulated",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [
+								{
+									"name": "ClientName",
+									"value": "solvia"
+								}
+							],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "cost_control_cost_acumulated_data_flow",
+									"type": "DataFlowReference",
+									"parameters": {
+										"client_abr": {
+											"value": "'@{item().client_abr}'",
+											"type": "Expression"
+										},
+										"client_name": {
+											"value": "'@{item().client_name}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"CostControlCostAcumulatedI": {
+											"current_date": "@utcNow('yyyy-MM-dd')",
+											"client": "SLV",
+											"client_name": "solvia"
+										},
+										"CostControlCostAcumulatedO": {
+											"ClientName": "solvia"
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "For Each Filename Comma SkipLine 30d",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "List FileNames Comma SkipLine 30d",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('List FileNames Comma SkipLine 30d').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy FileName Comma SkipLine 30d",
+							"description": "Hace un merge de todos los días y limpia los datos.",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "FilePath",
+											"value": "$$FILEPATH"
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": false,
+										"modifiedDatetimeStart": {
+											"value": "@formatDateTime(addDays(utcnow('yyyy-MM-dd'),-1))",
+											"type": "Expression"
+										},
+										"wildcardFileName": {
+											"value": "@concat( item().ClientAbr ,'-', item().TableName, '-*.csv')",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings",
+										"skipLineCount": 1
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "source_comma_header_iterative",
+									"type": "DatasetReference",
+									"parameters": {
+										"client_name": {
+											"value": "@item().ClientName",
+											"type": "Expression"
+										},
+										"source_file_name": "''"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "sink_public_cloud",
+									"type": "DatasetReference",
+									"parameters": {
+										"ClientName": {
+											"value": "@item().ClientName",
+											"type": "Expression"
+										},
+										"OutputName": {
+											"value": "@concat('Staging_',item().TableName, '.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "List FileNames Comma SkipLine 30d",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "FileNames_Comma_SkipLine_30d.csv"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Lookup List Clients_Filenames",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "For Each Filename Comma NoH",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "For Each Filename Comma SkipLine",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "For Each Filename Thorn NoH",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "For Each Client Then Copy",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "For Each Client Then Run Dataflow",
+						"dependencyConditions": [
+							"Completed"
+						]
+					},
+					{
+						"activity": "For Each Filename Comma SkipLine 30d",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "source_filenames_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"file_name_list": "Clients_Filenames.csv"
+						}
+					}
+				}
+			},
+			{
+				"name": "For Each Client_Filename",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup List Clients_Filenames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup List Clients_Filenames').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "PublicCloudMergeDayToHistDf",
+							"type": "ExecuteDataFlow",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "1.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataflow": {
+									"referenceName": "PublicCloudMergeDayToHistDf",
+									"type": "DataFlowReference",
+									"parameters": {
+										"client_name": {
+											"value": "'@{item().client_name}'",
+											"type": "Expression"
+										},
+										"table_name": {
+											"value": "'@{item().table_name}'",
+											"type": "Expression"
+										}
+									},
+									"datasetParameters": {
+										"IncrementingFile": {
+											"ClientName": {
+												"value": "@item().client_name",
+												"type": "Expression"
+											},
+											"OutputName": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										},
+										"DailyExtraction": {
+											"ClientName": {
+												"value": "@item().client_name",
+												"type": "Expression"
+											},
+											"OutputName": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										},
+										"MergedHistoricalData": {
+											"ClientName": {
+												"value": "@item().client_name",
+												"type": "Expression"
+											},
+											"OutputName": {
+												"value": "@item().table_name",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								"compute": {
+									"coreCount": 8,
+									"computeType": "General"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"execution_flag": {
+				"type": "String",
+				"defaultValue": "true"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-09-03T07:26:57Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

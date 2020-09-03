@@ -1,0 +1,52 @@
+{
+	"name": "hadr_backups_sql_server_d_i",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "stwepreporting",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"current_date": {
+				"type": "String",
+				"defaultValue": "@utcNow('yyyy-MM-dd')"
+			},
+			"client_abr": {
+				"type": "String",
+				"defaultValue": "SLV"
+			},
+			"client_name": {
+				"type": "string",
+				"defaultValue": "solvia"
+			}
+		},
+		"folder": {
+			"name": "PublicCloudPre"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@concat(dataset().client_abr,'-BackupsSQLServer-',utcnow('yyyy-MM-dd'),'.csv')",
+					"type": "Expression"
+				},
+				"container": {
+					"value": "@dataset().client_name",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "þ",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "col1",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

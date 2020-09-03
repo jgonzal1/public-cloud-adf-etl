@@ -1,0 +1,47 @@
+{
+	"name": "governance_total_tags_data_flow",
+	"properties": {
+		"folder": {
+			"name": "PublicCloudDailyLoad"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "source_thorn_iterative",
+						"type": "DatasetReference"
+					},
+					"name": "GovTotTagsI"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "governance_total_tags_o",
+						"type": "DatasetReference"
+					},
+					"name": "GovTotTagsO"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SplitResourceAndTag"
+				},
+				{
+					"name": "Select"
+				},
+				{
+					"name": "FilterVoids"
+				},
+				{
+					"name": "Aggregate"
+				},
+				{
+					"name": "InsertRowCount"
+				}
+			],
+			"script": "parameters{\n\tclient_name as string,\n\tclient_abr as string\n}\nsource(output(\n\t\tcol1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'FileName',\n\tmodifiedAfter: (addDays(currentTimestamp(),-1)),\n\tskipLines: 3,\n\twildcardPaths:[(concat( $client_abr ,\"-TotalTags-*.csv\"))]) ~> GovTotTagsI\nGovTotTagsI derive(Resource = rtrim(left(col1,169)),\n\t\tTags = left(substring(col1,170),locate(\"  \",substring(col1,170))),\n\t\t{Date modified} = substring(FileName,16,10)) ~> SplitResourceAndTag\nSplitResourceAndTag select(mapColumn(\n\t\t{Date modified},\n\t\tTags\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select\nSelect filter(instr(Tags,',')>0) ~> FilterVoids\nInsertRowCount aggregate(groupBy({Date modified},\n\t\tTags),\n\tNumberOfTags = sum(IsRow)) ~> Aggregate\nFilterVoids derive(IsRow = 1) ~> InsertRowCount\nAggregate sink(input(\n\t\t{Date modified} as string,\n\t\tTags as string,\n\t\tNumberOfTags as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['Staging_TotalTags.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> GovTotTagsO"
+		}
+	}
+}

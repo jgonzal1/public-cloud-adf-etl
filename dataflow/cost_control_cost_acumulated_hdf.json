@@ -1,0 +1,41 @@
+{
+	"name": "cost_control_cost_acumulated_hdf",
+	"properties": {
+		"folder": {
+			"name": "PublicCloudHistoricalDemo"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "source_thorn_iterative",
+						"type": "DatasetReference"
+					},
+					"name": "CostControlCostAcumulatedI"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "sink_public_cloud_dataflows",
+						"type": "DatasetReference"
+					},
+					"name": "CostControlCostAcumulatedO"
+				}
+			],
+			"transformations": [
+				{
+					"name": "ParsingColumnsContents"
+				},
+				{
+					"name": "SelectPayloadColumns"
+				},
+				{
+					"name": "FilterPayloadRows"
+				}
+			],
+			"script": "parameters{\n\tclient_abr as string,\n\tclient_name as string\n}\nsource(output(\n\t\tcol1 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'FileName',\n\tmodifiedBefore: (toTimestamp(1598493600000L)),\n\twildcardPaths:[(concat( $client_abr ,\"-CostAcumulated-*.csv\"))]) ~> CostControlCostAcumulatedI\nCostControlCostAcumulatedI derive(InstanceName = left(col1,locate('  ',col1)),\n\t\tPretaxCost = regexExtract(col1,'  ([\\\\d\\\\.]+)',1),\n\t\tDate = regexExtract(FileName,'(\\\\d{4}-\\\\d\\\\d-\\\\d\\\\d)',1)) ~> ParsingColumnsContents\nParsingColumnsContents select(mapColumn(\n\t\tInstanceName,\n\t\tPretaxCost,\n\t\tDate\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectPayloadColumns\nSelectPayloadColumns filter(length(PretaxCost)>0) ~> FilterPayloadRows\nFilterPayloadRows sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['CostAcumulated.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> CostControlCostAcumulatedO"
+		}
+	}
+}

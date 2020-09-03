@@ -1,0 +1,39 @@
+{
+	"name": "PublicCloudMergeDayToHistDf",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "sink_public_cloud_inc",
+						"type": "DatasetReference"
+					},
+					"name": "IncrementingFile"
+				},
+				{
+					"dataset": {
+						"referenceName": "sink_public_cloud_inc",
+						"type": "DatasetReference"
+					},
+					"name": "DailyExtraction"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "sink_public_cloud_pbi",
+						"type": "DatasetReference"
+					},
+					"name": "MergedHistoricalData"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Union"
+				}
+			],
+			"script": "parameters{\n\tclient_name as string,\n\ttable_name as string\n}\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:[(concat($client_name,\"/\",$table_name,\".csv\"))]) ~> IncrementingFile\nsource(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpurgeFiles: true,\n\twildcardPaths:[(concat($client_name,\"/Staging_\",$table_name,\".csv\"))]) ~> DailyExtraction\nIncrementingFile, DailyExtraction union(byName: true)~> Union\nUnion sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:[(concat($table_name,\".csv\"))],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> MergedHistoricalData"
+		}
+	}
+}
